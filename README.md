@@ -1,2 +1,1 @@
-# quilting-game-rs
-An abstract strategy game
+# Quilting — An abstract strategy game
