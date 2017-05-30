@@ -38,10 +38,14 @@ impl Rotation {
 
         match self {
             NoRotation      => (x, y),
-            Clockwise90     => (height - y, x),
-            Clockwise180    => (width - x, height - y),
-            Clockwise270    => (y, width - x),
+            Clockwise90     => (height - y - 1, x),
+            Clockwise180    => (width - x - 1, height - y - 1),
+            Clockwise270    => (y, width - x - 1),
         }
+    }
+
+    fn is_even(self) -> bool {
+        self == Rotation::NoRotation || self == Rotation::Clockwise180
     }
 }
 
@@ -50,40 +54,45 @@ impl Flip {
         use self::Flip::*;
 
         match self {
-            Identity => (x, y),
-            Horizontal  => (width - x, y),
+            Identity    => (x, y),
+            Horizontal  => (width - x - 1, y),
         }
     }
 }
 
 impl Transformation {
+    pub fn new(rotation: Rotation, flip: Flip) -> Self {
+        Transformation {
+            rotation: rotation,
+            flip: flip,
+        }
+    }
+
     pub fn apply(self, width: usize, height: usize, x: usize, y: usize) -> (usize, usize) {
         let Transformation { rotation, flip } = self;
         let rotated = rotation.apply(width, height, x, y);
-        flip.apply(width, height, rotated.0, rotated.1)
+        if rotation.is_even() {
+            flip.apply(width, height, rotated.0, rotated.1)
+        } else {
+            flip.apply(height, width, rotated.0, rotated.1)
+        }
     }
-}
-
-#[derive(Debug, Clone)]
-pub struct Positions<'a> {
-    raw_positions: slice::Iter<'a, (usize, usize)>,
-    transformation: Transformation,
-    width: usize,
-    height: usize,
 }
 
 impl Piece {
     pub fn width(&self, transformation: Transformation) -> usize {
-        match transformation.rotation {
-            Rotation::NoRotation | Rotation::Clockwise180 => self.width,
-            Rotation::Clockwise90 | Rotation::Clockwise270 => self.height,
+        if transformation.rotation.is_even() {
+            self.width
+        } else {
+            self.height
         }
     }
 
     pub fn height(&self, transformation: Transformation) -> usize {
-        match transformation.rotation {
-            Rotation::NoRotation | Rotation::Clockwise180 => self.height,
-            Rotation::Clockwise90 | Rotation::Clockwise270 => self.width,
+        if transformation.rotation.is_even() {
+            self.height
+        } else {
+            self.width
         }
     }
 
@@ -121,6 +130,14 @@ impl Piece {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct Positions<'a> {
+    raw_positions: slice::Iter<'a, (usize, usize)>,
+    transformation: Transformation,
+    width: usize,
+    height: usize,
+}
+
 impl<'a> Iterator for Positions<'a> {
     type Item = (usize, usize);
 
@@ -137,5 +154,48 @@ impl<'a> Iterator for Positions<'a> {
 impl<'a> ExactSizeIterator for Positions<'a> {
     fn len(&self) -> usize {
         self.raw_positions.len()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use super::Rotation::*;
+    use super::Flip::*;
+
+    #[test]
+    fn transform_upper_left() {
+        assert_eq!(Transformation::new(NoRotation,   Identity).apply(6, 4, 0, 0), (0, 0));
+        assert_eq!(Transformation::new(Clockwise90,  Identity).apply(6, 4, 0, 0), (3, 0));
+        assert_eq!(Transformation::new(Clockwise180, Identity).apply(6, 4, 0, 0), (5, 3));
+        assert_eq!(Transformation::new(Clockwise270, Identity).apply(6, 4, 0, 0), (0, 5));
+        assert_eq!(Transformation::new(NoRotation,   Horizontal).apply(6, 4, 0, 0), (5, 0));
+        assert_eq!(Transformation::new(Clockwise90,  Horizontal).apply(6, 4, 0, 0), (0, 0));
+        assert_eq!(Transformation::new(Clockwise180, Horizontal).apply(6, 4, 0, 0), (0, 3));
+        assert_eq!(Transformation::new(Clockwise270, Horizontal).apply(6, 4, 0, 0), (3, 5));
+    }
+
+    #[test]
+    fn transform_upper_right() {
+        assert_eq!(Transformation::new(NoRotation,   Identity).apply(8, 6, 7, 0), (7, 0));
+        assert_eq!(Transformation::new(Clockwise90,  Identity).apply(8, 6, 7, 0), (5, 7));
+        assert_eq!(Transformation::new(Clockwise180, Identity).apply(8, 6, 7, 0), (0, 5));
+        assert_eq!(Transformation::new(Clockwise270, Identity).apply(8, 6, 7, 0), (0, 0));
+        assert_eq!(Transformation::new(NoRotation,   Horizontal).apply(8, 6, 7, 0), (0, 0));
+        assert_eq!(Transformation::new(Clockwise90,  Horizontal).apply(8, 6, 7, 0), (0, 7));
+        assert_eq!(Transformation::new(Clockwise180, Horizontal).apply(8, 6, 7, 0), (7, 5));
+        assert_eq!(Transformation::new(Clockwise270, Horizontal).apply(8, 6, 7, 0), (5, 0));
+    }
+
+    #[test]
+    fn transform_2_1() {
+        assert_eq!(Transformation::new(NoRotation,   Identity).apply(6, 4, 2, 1), (2, 1));
+        assert_eq!(Transformation::new(Clockwise90,  Identity).apply(6, 4, 2, 1), (2, 2));
+        assert_eq!(Transformation::new(Clockwise180, Identity).apply(6, 4, 2, 1), (3, 2));
+        assert_eq!(Transformation::new(Clockwise270, Identity).apply(6, 4, 2, 1), (1, 3));
+        assert_eq!(Transformation::new(NoRotation,   Horizontal).apply(6, 4, 2, 1), (3, 1));
+        assert_eq!(Transformation::new(Clockwise90,  Horizontal).apply(6, 4, 2, 1), (1, 2));
+        assert_eq!(Transformation::new(Clockwise180, Horizontal).apply(6, 4, 2, 1), (2, 2));
+        assert_eq!(Transformation::new(Clockwise270, Horizontal).apply(6, 4, 2, 1), (2, 3));
     }
 }
