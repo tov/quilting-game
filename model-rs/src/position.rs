@@ -10,10 +10,21 @@ pub struct Position {
 }
 
 impl Position {
+    /// Creates a new position with the given x and y coordinates.
     pub fn new(x: usize, y: usize) -> Self {
         Position {
             x: x,
             y: y,
+        }
+    }
+
+    /// Translates a position relative to another.
+    ///
+    /// (Like vector addition.)
+    pub fn translate(self, other: Position) -> Self {
+        Position {
+            x: self.x + other.x,
+            y: self.y + other.y,
         }
     }
 }

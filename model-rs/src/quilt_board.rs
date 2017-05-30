@@ -111,14 +111,13 @@ impl QuiltBoard {
                          -> Result<(), PlacementError>
     {
         for p in piece.positions(transformation) {
-            let x = position.x + p.x;
-            let y = position.y + p.y;
+            let p = p.translate(position);
 
-            if x >= self.dimension.width {
+            if p.x >= self.dimension.width {
                 return Err(PlacementError::OverhangsRight);
-            } else if y >= self.dimension.height {
+            } else if p.y >= self.dimension.height {
                 return Err(PlacementError::OverhangsBottom);
-            } else if self.rows[y][x] {
+            } else if self.is_position_covered(p) {
                 return Err(PlacementError::OverlapsPiece);
             }
         }
