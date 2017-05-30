@@ -1,3 +1,5 @@
+use std::default::Default;
+
 /// A position on the board or in a piece.
 ///
 /// Origin is in the upper left.
@@ -111,6 +113,10 @@ impl Transformation {
         }
     }
 
+    pub fn identity() -> Self {
+        Transformation::new(Rotation::NoRotation, Flip::Identity)
+    }
+
     pub fn apply_dim(self, d: Dimension) -> Dimension {
         self.rotation.apply_dim(d)
     }
@@ -120,6 +126,12 @@ impl Transformation {
         let p = rotation.apply(d, p);
         let d = rotation.apply_dim(d);
         flip.apply(d, p)
+    }
+}
+
+impl Default for Transformation {
+    fn default() -> Self {
+        Self::identity()
     }
 }
 

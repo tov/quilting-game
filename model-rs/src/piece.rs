@@ -4,6 +4,12 @@ use std::slice;
 use position::{Position, Dimension, Transformation};
 
 /// A game piece
+///
+/// Invariant:
+///
+///  - The positions fit tightly within the dimension.
+///
+///  - The positions are sorted.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Piece {
     dimension: Dimension,
@@ -13,31 +19,21 @@ pub struct Piece {
 }
 
 impl Piece {
-    /// Does this `Piece` satisfy the invariant for `Piece`s?
-    ///
-    /// In particular:
-    ///
-    ///  - Do the positions fit tightly within the dimension?
-    ///
-    ///  - Are the positions sorted?
-    pub fn invariant(&self) -> bool {
-        let mut dimension = Dimension::new(0, 0);
-        let mut previous  = None;
+    pub fn new<I>(positions: I, cost: usize, distance: usize) -> Self
+        where I: IntoIterator<Item = Position>
+    {
+        let mut positions: Vec<_> = positions.into_iter().collect();
+        positions.sort();
+        positions.dedup();
 
-        for &p in &*self.positions {
-            dimension.width = cmp::max(dimension.width, p.x + 1);
-            dimension.height = cmp::max(dimension.height, p.y + 1);
+        let dimension = compute_dimension(positions.iter());
 
-            if let Some(previous) = previous {
-                if previous >= p {
-                    return false;
-                }
-            }
-
-            previous = Some(p);
+        Piece {
+            dimension: dimension,
+            positions: positions.into_boxed_slice(),
+            cost:      cost,
+            distance:  distance,
         }
-
-        dimension == self.dimension
     }
 
     pub fn dimension(&self, transformation: Transformation) -> Dimension {
@@ -67,6 +63,20 @@ impl Piece {
             transformation: transformation,
         }
     }
+}
+
+/// Computes the maximum dimension requires to hold the given positions.
+fn compute_dimension<'a, I>(positions: I) -> Dimension
+    where I: Iterator<Item = &'a Position>
+{
+    let mut dimension = Dimension::new(0, 0);
+
+    for &p in positions {
+        dimension.width = cmp::max(dimension.width, p.x + 1);
+        dimension.height = cmp::max(dimension.height, p.y + 1);
+    }
+
+    dimension
 }
 
 #[derive(Debug, Clone)]
