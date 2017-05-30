@@ -19,6 +19,7 @@ pub struct Piece {
 }
 
 impl Piece {
+    /// Constructs a new piece from the given positions, cost, and move distance.
     pub fn new<I>(positions: I, cost: usize, distance: usize) -> Self
         where I: IntoIterator<Item = Position>
     {
@@ -36,26 +37,32 @@ impl Piece {
         }
     }
 
+    /// Gets the dimension of this piece under the given transformation.
     pub fn dimension(&self, transformation: Transformation) -> Dimension {
         transformation.apply_dim(self.dimension)
     }
 
+    /// Gets the width of this piece under the given transformation.
     pub fn width(&self, transformation: Transformation) -> usize {
         self.dimension(transformation).width
     }
 
+    /// Gets the height of this piece under the given transformation.
     pub fn height(&self, transformation: Transformation) -> usize {
         self.dimension(transformation).height
     }
 
+    /// Gets the cost of this piece.
     pub fn cost(&self) -> usize {
         self.cost
     }
 
+    /// Gets the distance moved for this piece.
     pub fn distance(&self) -> usize {
         self.distance
     }
 
+    /// Gets an iterator over the positions of this piece under the given transformation.
     pub fn positions(&self, transformation: Transformation) -> Positions {
         Positions {
             raw_positions: (&*self.positions).into_iter(),
@@ -65,7 +72,7 @@ impl Piece {
     }
 }
 
-/// Computes the maximum dimension requires to hold the given positions.
+/// Computes the maximum dimension required to hold the given positions.
 fn compute_dimension<'a, I>(positions: I) -> Dimension
     where I: Iterator<Item = &'a Position>
 {
@@ -79,6 +86,7 @@ fn compute_dimension<'a, I>(positions: I) -> Dimension
     dimension
 }
 
+/// An iterator over the (transformed) positions of a `Piece`.
 #[derive(Debug, Clone)]
 pub struct Positions<'a> {
     raw_positions:  slice::Iter<'a, Position>,
