@@ -58,6 +58,31 @@ impl PieceBoard {
     }
 }
 
+impl<'a> Iterator for Pieces<'a> {
+    type Item = &'a Piece;
+
+    fn next(&mut self) -> Option<&'a Piece> {
+        self.0.next()
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.0.size_hint()
+    }
+}
+
+impl<'a> ExactSizeIterator for Pieces<'a> {
+    fn len(&self) -> usize {
+        self.0.len()
+    }
+}
+
+impl<'a> DoubleEndedIterator for Pieces<'a> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.0.next_back()
+    }
+}
+
+/// [Fisher-Yates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle).
 fn shuffle<R: rand::Rng, T>(rng: &mut R, vd: &mut VecDeque<T>) {
     use rand::distributions::{IndependentSample, Range};
 

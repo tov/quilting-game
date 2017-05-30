@@ -8,9 +8,3 @@ pub mod quilt_board;
 pub mod time_board;
 pub mod piece_board;
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-    }
-}
