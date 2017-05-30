@@ -17,11 +17,16 @@ impl QuiltBoard {
         self.rows.len() == self.height
     }
 
-    pub fn can_add_piece(&self, piece: Piece) -> bool {
+    pub fn can_add_piece(&self, x: usize, y: usize, piece: Piece) -> bool {
+//        if piece.width() + x > self.width {
+//            false
+//        } else {
+//            false
+//        }
         false
     }
 
-    pub fn add_piece(x: usize, y: usize, piece: Piece) -> Result<(), Piece> {
+    pub fn add_piece(&mut self, x: usize, y: usize, piece: Piece) -> Result<(), Piece> {
         Err(piece)
     }
 }
