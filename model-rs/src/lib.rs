@@ -3,6 +3,7 @@
 
 extern crate rand;
 
+pub mod position;
 pub mod piece;
 pub mod quilt_board;
 pub mod time_board;
