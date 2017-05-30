@@ -37,7 +37,7 @@ impl Dimension {
     }
 
     /// Is the given `Position` within the given `Dimension`?
-    pub fn is_within(self, p: Position) -> bool {
+    pub fn contains(self, p: Position) -> bool {
         p.x < self.width && p.y < self.height
     }
 

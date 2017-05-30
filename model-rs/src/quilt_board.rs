@@ -42,7 +42,7 @@ impl QuiltBoard {
     }
 
     /// Returns the number of squares covered by pieces.
-    pub fn squares_covered(&self) -> usize {
+    pub fn positions_covered(&self) -> usize {
         let mut result = 0;
 
         for row in &*self.rows {
@@ -52,6 +52,28 @@ impl QuiltBoard {
         }
 
         result
+    }
+
+    pub fn dimension(&self) -> Dimension {
+        self.dimension
+    }
+
+    pub fn width(&self) -> usize {
+        self.dimension.width
+    }
+
+    pub fn height(&self) -> usize {
+        self.dimension.height
+    }
+
+    /// Is the given position in bounds for the quilt board?
+    pub fn is_position_in_bounds(&self, position: Position) -> bool {
+        self.dimension.contains(position)
+    }
+
+    pub fn is_position_covered(&self, position: Position) -> bool {
+        self.is_position_in_bounds(position) &&
+            self.rows[position.y][position.x]
     }
 
     /// Is there a `size`-by-`size` square covered?
@@ -68,14 +90,10 @@ impl QuiltBoard {
     }
 
     /// Is there a `size`-by-`size` square covered with its upper left at the given position?
-    pub fn is_square_covered_at(&self, position: Position, size: usize) -> bool {
+    fn is_square_covered_at(&self, position: Position, size: usize) -> bool {
         for y in position.y .. position.y + size {
             for x in position.x .. position.x + size {
-                if x >= self.dimension.width || y >= self.dimension.height {
-                    return false;
-                }
-
-                if ! self.rows[y][x] {
+                if ! self.is_position_covered(Position::new(x, y)) {
                     return false;
                 }
             }
@@ -125,5 +143,91 @@ impl QuiltBoard {
 impl Default for QuiltBoard {
     fn default() -> Self {
         QuiltBoard::new(Dimension::new(DEFAULT_DIMENSION, DEFAULT_DIMENSION))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use piece::*;
+    use position::{Transformation, Rotation, Flip};
+
+    fn pos(x: usize, y: usize) -> Position {
+        Position::new(x, y)
+    }
+
+    // ##
+    //  #
+    //  #
+    fn a_piece() -> Piece {
+        Piece::new(vec![pos(0, 0), pos(1, 0), pos(1, 1), pos(1, 2)], 0, 0)
+    }
+
+    #[test]
+    fn place_a_piece_in_upper_left() {
+        let mut board = QuiltBoard::default();
+
+        assert_eq!(board.add_piece(pos(0, 0), &a_piece(), Transformation::identity()), Ok(()));
+
+        assert_eq!(board.positions_covered(), 4);
+        assert!(board.is_position_covered(pos(0, 0)));
+        assert!(board.is_position_covered(pos(1, 0)));
+        assert!(board.is_position_covered(pos(1, 1)));
+        assert!(board.is_position_covered(pos(1, 2)));
+        assert!(! board.is_position_covered(pos(0, 1)));
+        assert!(! board.is_position_covered(pos(0, 2)));
+        assert!(! board.is_position_covered(pos(2, 0)));
+        assert!(! board.is_position_covered(pos(2, 1)));
+    }
+
+    #[test]
+    fn place_four_pieces() {
+        let mut board = QuiltBoard::default();
+
+        // ------
+        // --##--
+        // ---#--
+        // ---#--
+        // ------
+        // ------
+        assert_eq!(board.add_piece(pos(2, 1), &a_piece(), Transformation::identity()), Ok(()));
+        // ------
+        // --##--
+        // --##--
+        // --##--
+        // --##--
+        // ------
+        assert_eq!(board.add_piece(pos(2, 2), &a_piece(),
+                                   Transformation::new(Rotation::Clockwise180, Flip::Identity)),
+                   Ok(()));
+
+        assert!(board.is_square_covered(2));
+        assert!(!board.is_square_covered(3));
+
+        // -------
+        // --####-
+        // --###--
+        // --###--
+        // --##---
+        // -------
+        assert_eq!(board.add_piece(pos(4, 1), &a_piece(),
+                                   Transformation::new(Rotation::NoRotation, Flip::Horizontal)),
+                   Ok(()));
+
+        assert!(board.is_square_covered(3));
+        assert!(!board.is_square_covered(4));
+
+        // -------
+        // --####-
+        // --####-
+        // --####-
+        // --####-
+        // -------
+        assert_eq!(board.add_piece(pos(5, 2), &a_piece(),
+                                   Transformation::new(Rotation::Clockwise180, Flip::Horizontal)),
+                   Ok(()));
+
+//        assert!(board.is_square_covered_at(pos(2, 1), 3));
+//        assert!(!board.is_square_covered(5));
     }
 }
