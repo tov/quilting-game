@@ -1,3 +1,5 @@
+use std::default::Default;
+
 use piece::Piece;
 use position::{Position, Dimension, Transformation};
 
@@ -13,17 +15,20 @@ pub struct QuiltBoard {
     rows:      Box<[Box<[bool]>]>,
 }
 
+/// The width and height of the default quilt board.
+pub const DEFAULT_DIMENSION: usize = 9;
+
 impl QuiltBoard {
     /// Creates a new, empty board of the given dimensions.
-    pub fn new(width: usize, height: usize) -> Self {
+    pub fn new(dimension: Dimension) -> Self {
         let mut rows = Vec::new();
 
-        for _ in 0 .. height {
-            rows.push(vec![false; width].into_boxed_slice());
+        for _ in 0 .. dimension.height {
+            rows.push(vec![false; dimension.width].into_boxed_slice());
         }
 
         QuiltBoard {
-            dimension: Dimension::new(width, height),
+            dimension: dimension,
             rows:      rows.into_boxed_slice(),
         }
     }
@@ -106,5 +111,11 @@ impl QuiltBoard {
         for p in piece.positions(transformation) {
             self.rows[position.y + p.y][position.x + p.x] = true;
         }
+    }
+}
+
+impl Default for QuiltBoard {
+    fn default() -> Self {
+        QuiltBoard::new(Dimension::new(DEFAULT_DIMENSION, DEFAULT_DIMENSION))
     }
 }
