@@ -198,4 +198,73 @@ mod test {
         assert_eq!(Transformation::new(Clockwise180, Horizontal).apply(6, 4, 2, 1), (2, 2));
         assert_eq!(Transformation::new(Clockwise270, Horizontal).apply(6, 4, 2, 1), (2, 3));
     }
+
+    // ##
+    //  #
+    //  #
+    fn a_piece() -> Piece {
+        Piece {
+            width: 2,
+            height: 3,
+            positions: vec![(0, 0), (1, 0), (1, 1), (1, 2)].into_boxed_slice(),
+            cost: 0,
+            distance: 0,
+        }
+    }
+
+    #[test]
+    fn transform_width_height() {
+        let piece = a_piece();
+        let t1 = Transformation::new(NoRotation,   Identity);
+        let t2 = Transformation::new(Clockwise90,  Identity);
+
+        assert_eq!(piece.width(t1), 2);
+        assert_eq!(piece.width(t2), 3);
+        assert_eq!(piece.height(t1), 3);
+        assert_eq!(piece.height(t2), 2);
+    }
+
+    #[test]
+    fn positions_iterator_with_identity() {
+        let piece = a_piece();
+        let mut positions = piece.positions(Transformation::new(NoRotation, Identity));
+        assert_eq!(positions.next(), Some((0, 0)));
+        assert_eq!(positions.next(), Some((1, 0)));
+        assert_eq!(positions.next(), Some((1, 1)));
+        assert_eq!(positions.next(), Some((1, 2)));
+        assert_eq!(positions.next(), None);
+    }
+
+    #[test]
+    fn positions_iterator_with_0_h() {
+        let piece = a_piece();
+        let mut positions = piece.positions(Transformation::new(NoRotation, Horizontal));
+        assert_eq!(positions.next(), Some((1, 0)));
+        assert_eq!(positions.next(), Some((0, 0)));
+        assert_eq!(positions.next(), Some((0, 1)));
+        assert_eq!(positions.next(), Some((0, 2)));
+        assert_eq!(positions.next(), None);
+    }
+
+    #[test]
+    fn positions_iterator_with_90_i() {
+        let piece = a_piece();
+        let mut positions = piece.positions(Transformation::new(Clockwise90, Identity));
+        assert_eq!(positions.next(), Some((2, 0)));
+        assert_eq!(positions.next(), Some((2, 1)));
+        assert_eq!(positions.next(), Some((1, 1)));
+        assert_eq!(positions.next(), Some((0, 1)));
+        assert_eq!(positions.next(), None);
+    }
+
+    #[test]
+    fn positions_iterator_with_90_h() {
+        let piece = a_piece();
+        let mut positions = piece.positions(Transformation::new(Clockwise90, Horizontal));
+        assert_eq!(positions.next(), Some((0, 0)));
+        assert_eq!(positions.next(), Some((0, 1)));
+        assert_eq!(positions.next(), Some((1, 1)));
+        assert_eq!(positions.next(), Some((2, 1)));
+        assert_eq!(positions.next(), None);
+    }
 }
