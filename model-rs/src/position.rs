@@ -88,6 +88,7 @@ pub enum Flip {
 }
 
 impl Flip {
+    /// Applies this flip transformation to the given position within the given dimension.
     pub fn apply(self, d: Dimension, p: Position) -> Position {
         use self::Flip::*;
 
@@ -106,6 +107,7 @@ pub struct Transformation {
 }
 
 impl Transformation {
+    /// Creates a new transformation as the composition of a rotation (first) and a flip (second).
     pub fn new(rotation: Rotation, flip: Flip) -> Self {
         Transformation {
             rotation: rotation,
@@ -113,14 +115,17 @@ impl Transformation {
         }
     }
 
+    /// The identity tranformation.
     pub fn identity() -> Self {
         Transformation::new(Rotation::NoRotation, Flip::Identity)
     }
 
+    /// Applies this transformation to a dimension.
     pub fn apply_dim(self, d: Dimension) -> Dimension {
         self.rotation.apply_dim(d)
     }
 
+    /// Applies this tranformation to a position within the given dimension.
     pub fn apply(self, d: Dimension, p: Position) -> Position {
         let Transformation { rotation, flip } = self;
         let p = rotation.apply(d, p);
