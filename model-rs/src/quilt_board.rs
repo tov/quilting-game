@@ -138,6 +138,19 @@ impl QuiltBoard {
 
         Ok(())
     }
+
+    fn visualize(&self) -> String {
+        let mut result = String::new();
+
+        for row in &*self.rows {
+            for &b in &**row {
+                result.push(if b {'#'} else {'-'});
+            }
+            result.push('\n');
+        }
+
+        result
+    }
 }
 
 impl Default for QuiltBoard {
@@ -184,50 +197,89 @@ mod test {
     fn place_four_pieces() {
         let mut board = QuiltBoard::default();
 
-        // ------
-        // --##--
-        // ---#--
-        // ---#--
-        // ------
-        // ------
         assert_eq!(board.add_piece(pos(2, 1), &a_piece(), Transformation::identity()), Ok(()));
-        // ------
-        // --##--
-        // --##--
-        // --##--
-        // --##--
-        // ------
+        assert_eq!(board.visualize(),
+                   "---------\n\
+                    --##-----\n\
+                    ---#-----\n\
+                    ---#-----\n\
+                    ---------\n\
+                    ---------\n\
+                    ---------\n\
+                    ---------\n\
+                    ---------\n");
         assert_eq!(board.add_piece(pos(2, 2), &a_piece(),
                                    Transformation::new(Rotation::Clockwise180, Flip::Identity)),
                    Ok(()));
+        assert_eq!(board.visualize(),
+                   "---------\n\
+                    --##-----\n\
+                    --##-----\n\
+                    --##-----\n\
+                    --##-----\n\
+                    ---------\n\
+                    ---------\n\
+                    ---------\n\
+                    ---------\n");
 
         assert!(board.is_square_covered(2));
         assert!(!board.is_square_covered(3));
 
-        // -------
-        // --####-
-        // --###--
-        // --###--
-        // --##---
-        // -------
         assert_eq!(board.add_piece(pos(4, 1), &a_piece(),
                                    Transformation::new(Rotation::NoRotation, Flip::Horizontal)),
                    Ok(()));
+        assert_eq!(board.visualize(),
+        "---------\n\
+                    --####---\n\
+                    --###----\n\
+                    --###----\n\
+                    --##-----\n\
+                    ---------\n\
+                    ---------\n\
+                    ---------\n\
+                    ---------\n");
 
         assert!(board.is_square_covered(3));
         assert!(!board.is_square_covered(4));
 
-        // -------
-        // --####-
-        // --####-
-        // --####-
-        // --####-
-        // -------
-        assert_eq!(board.add_piece(pos(5, 2), &a_piece(),
+        assert_eq!(board.add_piece(pos(4, 2), &a_piece(),
                                    Transformation::new(Rotation::Clockwise180, Flip::Horizontal)),
                    Ok(()));
+        assert_eq!(board.visualize(),
+                   "---------\n\
+                    --####---\n\
+                    --####---\n\
+                    --####---\n\
+                    --####---\n\
+                    ---------\n\
+                    ---------\n\
+                    ---------\n\
+                    ---------\n");
 
-//        assert!(board.is_square_covered_at(pos(2, 1), 3));
-//        assert!(!board.is_square_covered(5));
+        assert!(board.is_square_covered(4));
+        assert!(!board.is_square_covered(5));
+    }
+
+    #[test]
+    fn place_off_board() {
+        let mut board = QuiltBoard::default();
+        assert_eq!(board.add_piece(pos(8, 1), &a_piece(), Transformation::identity()),
+                   Err(PlacementError::OverhangsRight));
+
+        assert_eq!(board.add_piece(pos(4, 7), &a_piece(), Transformation::identity()),
+                   Err(PlacementError::OverhangsBottom));
+    }
+
+    #[test]
+    fn place_overlapping() {
+        let mut board = QuiltBoard::default();
+        assert_eq!(board.add_piece(pos(2, 1), &a_piece(), Transformation::identity()),
+                   Ok(()));
+        assert_eq!(board.add_piece(pos(2, 1), &a_piece(), Transformation::identity()),
+                   Err(PlacementError::OverlapsPiece));
+        assert_eq!(board.add_piece(pos(3, 1), &a_piece(), Transformation::identity()),
+                   Err(PlacementError::OverlapsPiece));
+        assert_eq!(board.add_piece(pos(4, 1), &a_piece(), Transformation::identity()),
+                   Ok(()));
     }
 }
