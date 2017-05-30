@@ -15,6 +15,14 @@ pub struct QuiltBoard {
     rows:      Box<[Box<[bool]>]>,
 }
 
+/// The ways in which a piece placement can fail.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum PlacementError {
+    OverhangsRight,
+    OverhangsBottom,
+    OverlapsPiece,
+}
+
 /// The width and height of the default quilt board.
 pub const DEFAULT_DIMENSION: usize = 9;
 
@@ -82,18 +90,18 @@ impl QuiltBoard {
     pub fn can_add_piece(&self, position: Position,
                          piece: &Piece,
                          transformation: Transformation)
-                         -> Result<(), &'static str>
+                         -> Result<(), PlacementError>
     {
         for p in piece.positions(transformation) {
             let x = position.x + p.x;
             let y = position.y + p.y;
 
             if x >= self.dimension.width {
-                return Err("Piece hangs off right edge of board");
+                return Err(PlacementError::OverhangsRight);
             } else if y >= self.dimension.height {
-                return Err("Piece hangs off bottom edge of board");
+                return Err(PlacementError::OverhangsBottom);
             } else if self.rows[y][x] {
-                return Err("Piece overlaps other piece");
+                return Err(PlacementError::OverlapsPiece);
             }
         }
 
@@ -101,16 +109,16 @@ impl QuiltBoard {
     }
 
     /// Adds the given piece at the specified position under the given transformation.
-    ///
-    /// # Errors
-    ///
-    /// Panics if the piece cannot be added because it doesn't fit.
-    pub fn add_piece(&mut self, position: Position, piece: &Piece, transformation: Transformation) {
-        self.can_add_piece(position, piece, transformation).unwrap();
+    pub fn add_piece(&mut self, position: Position, piece: &Piece, transformation: Transformation)
+                     -> Result<(), PlacementError>
+    {
+        self.can_add_piece(position, piece, transformation)?;
 
         for p in piece.positions(transformation) {
             self.rows[position.y + p.y][position.x + p.x] = true;
         }
+
+        Ok(())
     }
 }
 
