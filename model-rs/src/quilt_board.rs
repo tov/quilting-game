@@ -41,6 +41,36 @@ impl QuiltBoard {
         result
     }
 
+    /// Is there a `size`-by-`size` square covered?
+    pub fn is_square_covered(&self, size: usize) -> bool {
+        for y in 0 .. self.dimension.height - size + 1 {
+            for x in 0 .. self.dimension.width - size + 1 {
+                if self.is_square_covered_at(Position::new(x, y), size) {
+                    return true;
+                }
+            }
+        }
+
+        false
+    }
+
+    /// Is there a `size`-by-`size` square covered with its upper left at the given position?
+    pub fn is_square_covered_at(&self, position: Position, size: usize) -> bool {
+        for y in position.y .. position.y + size {
+            for x in position.x .. position.x + size {
+                if x >= self.dimension.width || y >= self.dimension.height {
+                    return false;
+                }
+
+                if ! self.rows[y][x] {
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
+
     /// Can the given piece be added at the given position under the given transformation?
     ///
     /// Returns `Err` of a reason if it cannot.
