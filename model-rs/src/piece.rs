@@ -105,9 +105,9 @@ mod test {
         Position::new(x, y)
     }
 
-    // ##
-    //  #
-    //  #
+    // 01
+    //  2
+    //  3
     fn a_piece() -> Piece {
         Piece {
             dimension: Dimension::new(2, 3),
@@ -132,6 +132,9 @@ mod test {
     #[test]
     fn positions_iterator_with_identity() {
         let piece = a_piece();
+        // 01
+        //  2
+        //  3
         let mut positions = piece.positions(Transformation::new(NoRotation, Identity));
         assert_eq!(positions.next(), Some(pos(0, 0)));
         assert_eq!(positions.next(), Some(pos(1, 0)));
@@ -143,6 +146,9 @@ mod test {
     #[test]
     fn positions_iterator_with_0_h() {
         let piece = a_piece();
+        // 10
+        // 2
+        // 3
         let mut positions = piece.positions(Transformation::new(NoRotation, Horizontal));
         assert_eq!(positions.next(), Some(pos(1, 0)));
         assert_eq!(positions.next(), Some(pos(0, 0)));
@@ -154,6 +160,8 @@ mod test {
     #[test]
     fn positions_iterator_with_90_i() {
         let piece = a_piece();
+        //   0
+        // 321
         let mut positions = piece.positions(Transformation::new(Clockwise90, Identity));
         assert_eq!(positions.next(), Some(pos(2, 0)));
         assert_eq!(positions.next(), Some(pos(2, 1)));
@@ -165,6 +173,8 @@ mod test {
     #[test]
     fn positions_iterator_with_90_h() {
         let piece = a_piece();
+        // 0
+        // 123
         let mut positions = piece.positions(Transformation::new(Clockwise90, Horizontal));
         assert_eq!(positions.next(), Some(pos(0, 0)));
         assert_eq!(positions.next(), Some(pos(0, 1)));
