@@ -50,7 +50,7 @@ impl Rotation {
 }
 
 impl Flip {
-    pub fn apply(self, width: usize, height: usize, x: usize, y: usize) -> (usize, usize) {
+    pub fn apply(self, width: usize, _height: usize, x: usize, y: usize) -> (usize, usize) {
         use self::Flip::*;
 
         match self {
