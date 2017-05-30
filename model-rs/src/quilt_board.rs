@@ -54,14 +54,17 @@ impl QuiltBoard {
         result
     }
 
+    /// The dimensions of the board.
     pub fn dimension(&self) -> Dimension {
         self.dimension
     }
 
+    /// The width of the board.
     pub fn width(&self) -> usize {
         self.dimension.width
     }
 
+    /// The height of the board.
     pub fn height(&self) -> usize {
         self.dimension.height
     }
@@ -71,6 +74,7 @@ impl QuiltBoard {
         self.dimension.contains(position)
     }
 
+    /// Is the given position covered by a piece?
     pub fn is_position_covered(&self, position: Position) -> bool {
         self.is_position_in_bounds(position) &&
             self.rows[position.y][position.x]
