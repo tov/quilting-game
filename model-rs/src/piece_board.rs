@@ -71,6 +71,17 @@ impl PieceBoardBuilder {
     }
 }
 
+/// [Fisher-Yates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle).
+fn shuffle<R: rand::Rng, T>(rng: &mut R, vd: &mut VecDeque<T>) {
+    use rand::distributions::{IndependentSample, Range};
+
+    for i in (1 .. vd.len()).rev() {
+        let range = Range::new(0, i);
+        let j = range.ind_sample(rng);
+        vd.swap(i, j);
+    }
+}
+
 /// The queue of pieces to be taken.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct PieceBoard {
@@ -134,17 +145,6 @@ impl<'a> ExactSizeIterator for Pieces<'a> {
 impl<'a> DoubleEndedIterator for Pieces<'a> {
     fn next_back(&mut self) -> Option<Self::Item> {
         self.0.next_back()
-    }
-}
-
-/// [Fisher-Yates shuffle](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle).
-fn shuffle<R: rand::Rng, T>(rng: &mut R, vd: &mut VecDeque<T>) {
-    use rand::distributions::{IndependentSample, Range};
-
-    for i in (1 .. vd.len()).rev() {
-        let range = Range::new(0, i);
-        let j = range.ind_sample(rng);
-        vd.swap(i, j);
     }
 }
 
