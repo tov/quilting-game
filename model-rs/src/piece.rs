@@ -45,6 +45,11 @@ impl Piece {
         }
     }
 
+    /// A small square piece that is placed on the `TimeBoard`.
+    pub fn single_position() -> Self {
+        Self::new(vec![Position::new(0, 0)], 0, 0, 0)
+    }
+
     /// Gets the dimension of this piece under the given transformation.
     pub fn dimension(&self, transformation: Transformation) -> Dimension {
         transformation.apply_dim(self.dimension)
