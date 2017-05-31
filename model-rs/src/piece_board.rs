@@ -52,6 +52,12 @@ impl PieceBoardBuilder {
         self
     }
 
+    /// Remove all pieces from the builder.
+    pub fn clear(mut self) -> Self {
+        self.piece_queue = VecDeque::new();
+        self
+    }
+
     /// Deserializes pieces from a `&[u8]` of JSON, adding to the piece queue.
     pub fn extend_from_slice(self, pieces: &[u8]) -> serde_json::Result<Self> {
         let pieces: Vec<Piece> = serde_json::from_slice(pieces)?;

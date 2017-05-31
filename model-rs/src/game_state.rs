@@ -3,10 +3,10 @@
 use std::default::Default;
 
 use position::Dimension;
-use player::{self, PlayerState};
+use player::{self, PlayerState, PlayOrder};
 use piece_board::{PieceBoard, PieceBoardBuilder};
 use quilt_board;
-use time_board::TimeBoard;
+use time_board::{TimeBoard, TimeBoardBuilder};
 
 /// The default size of the square needed to get the bonus.
 pub const DEFAULT_BONUS_SQUARE_SIZE: usize = 7;
@@ -15,7 +15,7 @@ pub const DEFAULT_BONUS_SQUARE_SIZE: usize = 7;
 #[derive(Debug, Clone)]
 pub struct GameBuilder {
     piece_board:       PieceBoardBuilder,
-    time_board:        TimeBoard,
+    time_board:        TimeBoardBuilder,
     nplayers:          usize,
     starting_currency: usize,
     quilt_dimension:   Dimension,
@@ -25,9 +25,18 @@ pub struct GameBuilder {
 impl GameBuilder {
     /// Creates a new builder with the default parameters.
     pub fn new() -> Self {
+        let mut result = Self::empty();
+        result.piece_board = PieceBoardBuilder::default();
+        result
+    }
+
+    /// Creates a new builder whose
+    /// [`PieceBoardBuilder`](../piece_board/struct.PieceBoardBuilder.html)
+    /// is empty of pieces.
+    pub fn empty() -> Self {
         GameBuilder {
-            piece_board:       PieceBoardBuilder::default(),
-            time_board:        TimeBoard::default(),
+            piece_board:       PieceBoardBuilder::empty(),
+            time_board:        TimeBoardBuilder::default(),
             nplayers:          player::DEFAULT_NPLAYERS,
             starting_currency: player::DEFAULT_STARTING_CURRENCY,
             quilt_dimension:   Dimension::square(quilt_board::DEFAULT_DIMENSION),
@@ -35,14 +44,24 @@ impl GameBuilder {
         }
     }
 
-    /// Changes the builder to use the given `PieceBoardBuilder`.
+    /// Changes the builder to use the given
+    /// [`PieceBoardBuilder`](../piece_board/struct.PieceBoardBuilder.html).
     pub fn piece_board(mut self, piece_board: PieceBoardBuilder) -> Self {
         self.piece_board = piece_board;
         self
     }
 
-    /// Changes the builder to use the given `TimeBoard`.
-    pub fn time_board(mut self, time_board: TimeBoard) -> Self {
+    /// Configure the piece board by modifying the
+    /// [`PieceBoardBuilder`](../piece_board/struct.PieceBoardBuilder.html).
+    pub fn with_piece_board<F>(mut self, k: F) -> Self
+        where F: FnOnce(PieceBoardBuilder) -> PieceBoardBuilder
+    {
+        self.piece_board = k(self.piece_board);
+        self
+    }
+
+    /// Changes the builder to use the given [`TimeBoard`](../time_board/struct.TimeBoard.html).
+    pub fn time_board(mut self, time_board: TimeBoardBuilder) -> Self {
         self.time_board = time_board;
         self
     }
@@ -95,21 +114,33 @@ impl GameBuilder {
             players.push(PlayerState::new(self.quilt_dimension, self.starting_currency))
         }
 
+        let piece_board;
+        let play_order;
+
+        if shuffle {
+            piece_board = self.piece_board.build();
+            play_order  = PlayOrder::new(self.nplayers);
+        } else {
+            piece_board = self.piece_board.build_in_order();
+            play_order  = PlayOrder::new_in_order(self.nplayers);
+        }
+
         GameState {
-            piece_board:       if shuffle {self.piece_board.build()}
-                               else {self.piece_board.build_in_order()},
-            time_board:        self.time_board,
+            piece_board:       piece_board,
+            time_board:        self.time_board.build(play_order),
             players:           players.into_boxed_slice(),
             bonus_square_size: self.bonus_square_size,
         }
     }
 
-    /// Builds the game, shuffling the `PieceBoard`.
+    /// Builds the game, shuffling the [`PieceBoard`](../piece_board/struct.PieceBoard.html)
+    /// and the play order.
     pub fn build(self) -> GameState {
         self.build_shuffle(true)
     }
 
-    /// Builds the game without shuffling the `PieceBoard`.
+    /// Builds the game without shuffling the [`PieceBoard`](../piece_board/struct.PieceBoard.html)
+    /// and the play order.
     pub fn build_in_order(self) -> GameState {
         self.build_shuffle(false)
     }
@@ -122,6 +153,8 @@ impl Default for GameBuilder {
 }
 
 /// The state of the game.
+///
+/// Configure and construct with [`GameBuilder`](struct.GameBuilder.html).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GameState {
     /// The board from which pieces are selected.
@@ -132,6 +165,13 @@ pub struct GameState {
     players:           Box<[PlayerState]>,
     /// The size quilt square to build to get the bonus, if it remains.
     bonus_square_size: Option<usize>,
+}
+
+impl GameState {
+    /// Is the game over?
+    pub fn is_game_over(&self) -> bool {
+        self.time_board.is_game_over() || self.piece_board.is_empty()
+    }
 }
 
 impl Default for GameState {

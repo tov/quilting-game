@@ -58,8 +58,47 @@ pub struct MoveResult {
     pub distance: usize,
 }
 
+/// Builder for configuring and constructing `TimeBoard`s.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TimeBoardBuilder {
+    squares: Box<[Square]>,
+}
+
+impl TimeBoardBuilder {
+    /// Configures the time board to use the default time board.
+    pub fn new() -> Self {
+        Self::from_slice(TIME_BOARD_JSON).unwrap()
+    }
+
+    /// Deserializes the time board configuration from JSON.
+    pub fn from_slice(json: &[u8]) -> serde_json::Result<Self> {
+        Ok(TimeBoardBuilder {
+            squares: serde_json::from_slice(json)?,
+        })
+    }
+
+    pub fn build(mut self, play_order: PlayOrder) -> TimeBoard {
+        assert!(play_order.len() >= 2, "Cannot play with fewer than two players");
+
+        self.squares[0].players = play_order;
+
+        TimeBoard {
+            squares: self.squares,
+            current_index: 0,
+        }
+    }
+}
+
+impl Default for TimeBoardBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// The time board.
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+///
+/// Build via [`TimeBoardBuilder`](struct.TimeBoardBuilder.html).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct TimeBoard {
     /// The squares of the board.
     squares: Box<[Square]>,
@@ -70,25 +109,6 @@ pub struct TimeBoard {
 }
 
 impl TimeBoard {
-    /// Creates a new time board with the default configuration and the given play order on the
-    /// 0th square.
-    pub fn new(play_order: PlayOrder) -> Self {
-        Self::from_slice(play_order, TIME_BOARD_JSON).unwrap()
-    }
-
-    /// Deserializes a new time board from a JSON slice.
-    pub fn from_slice(play_order: PlayOrder, json: &[u8]) -> serde_json::Result<Self> {
-        assert!(play_order.len() >= 2, "Cannot play with fewer than two players");
-
-        let mut squares: Box<[Square]> = serde_json::from_slice(json)?;
-        squares[0].players = play_order;
-
-        Ok(TimeBoard {
-            squares: squares,
-            current_index: 0,
-        })
-    }
-
     /// Views the squares of the time board.
     pub fn squares(&self) -> &[Square] {
         &*self.squares
@@ -179,7 +199,7 @@ impl TimeBoard {
 
 impl Default for TimeBoard {
     fn default() -> Self {
-        Self::new(PlayOrder::default())
+        TimeBoardBuilder::new().build(PlayOrder::default())
     }
 }
 
@@ -233,7 +253,8 @@ mod test {
         let play_order = PlayOrder::new(2);
 
         // [01][][][][][C][][C][][C][P][][][][C]
-        let mut time_board = TimeBoard::from_slice(play_order.clone(), TEST_BOARD).unwrap();
+        let mut time_board = TimeBoardBuilder::from_slice(TEST_BOARD).unwrap()
+            .build(play_order.clone());
 
         assert_eq!(time_board.current_player(), play_order.players().nth(0));
         assert_eq!(time_board.index_of_current_player(), 0);
