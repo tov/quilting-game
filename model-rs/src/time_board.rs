@@ -61,7 +61,12 @@ pub struct MoveResult {
 /// The time board.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct TimeBoard {
+    /// The squares of the board.
     squares: Box<[Square]>,
+    /// The index of the player whose turn it is.
+    ///
+    /// INVARIANT: This is the minimum index into squares that contains a player.
+    current_index: usize,
 }
 
 impl TimeBoard {
@@ -80,6 +85,7 @@ impl TimeBoard {
 
         Ok(TimeBoard {
             squares: squares,
+            current_index: 0,
         })
     }
 
@@ -97,13 +103,7 @@ impl TimeBoard {
     ///
     /// If the game is over, this returns the index of the last square.
     pub fn index_of_current_player(&self) -> usize {
-        for (i, square) in self.squares().into_iter().enumerate() {
-            if square.has_player() {
-                return i;
-            }
-        }
-
-        unreachable!("There must be at least one player");
+        self.current_index
     }
 
     /// Is the current game over?
@@ -151,6 +151,8 @@ impl TimeBoard {
 
         let start  = self.index_of_current_player();
         let stop   = cmp::min(start + distance, self.index_of_last_square());
+
+        self.current_index = cmp::min(stop, self.index_of_next_player());
 
         let player = self.squares[start].players.pop().unwrap();
         self.squares[stop].players.push(player);
