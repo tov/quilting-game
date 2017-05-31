@@ -94,6 +94,14 @@ impl PieceBoard {
         PieceBoardBuilder::new().build()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.piece_queue.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.piece_queue.len()
+    }
+
     pub fn depth(&self) -> usize {
         self.depth
     }
@@ -157,5 +165,24 @@ impl Default for PieceBoardBuilder {
 impl Default for PieceBoard {
     fn default() -> Self {
         PieceBoard::new()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use piece::*;
+
+    fn pieces() -> Vec<Piece> {
+        use self::examples::*;
+        vec![piece1(), piece2(), piece3(), piece4()]
+    }
+
+    #[test]
+    fn make_board() {
+        let builder = PieceBoardBuilder::empty()
+            .extend(pieces());
+        let board = builder.build();
+        assert_eq!(board.len(), 4);
     }
 }
