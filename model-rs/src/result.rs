@@ -1,3 +1,4 @@
+use std::{error, fmt};
 
 /// The Quilting game result type.
 pub type QResult<T> = Result<T, PlayerError>;
@@ -15,4 +16,24 @@ pub enum PlayerError {
     TakeOverDepth,
     /// The piece queue does not have that many pieces.
     OutOfPieces,
+}
+
+impl fmt::Display for PlayerError {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        formatter.write_str(error::Error::description(self))
+    }
+}
+
+impl error::Error for PlayerError {
+    fn description(&self) -> &str {
+        use self::PlayerError::*;
+
+        match *self {
+            PlacementOverhangsRight => "Piece placement overhangs right edge of quilt board",
+            PlacementOverhangsBottom => "Piece placement overhangs bottom edge of quilt board",
+            PlacementOverlapsPiece => "Piece placement overlaps another piece",
+            TakeOverDepth => "Cannot take pieces from that deep in the queue",
+            OutOfPieces => "The queue does not have that many pieces",
+        }
+    }
 }
