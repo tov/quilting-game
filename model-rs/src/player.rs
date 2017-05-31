@@ -5,7 +5,7 @@ use std::slice;
 use rand;
 
 /// A game player.
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize)]
 pub struct Player(usize);
 
 /// The default number of players (2).
@@ -23,7 +23,7 @@ impl Player {
 /// A stack of players ready to play.
 ///
 /// This is placed on the time board to track whose turn it is.
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct PlayOrder(Vec<Player>);
 
 impl PlayOrder {

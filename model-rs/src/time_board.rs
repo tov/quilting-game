@@ -10,7 +10,7 @@ use player::PlayOrder;
 const TIME_BOARD_JSON: &'static [u8] = include_bytes!("../data/time_board.json");
 
 /// The time board.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct TimeBoard {
     squares: Box<[Square]>,
 }
@@ -26,7 +26,6 @@ pub struct Square {
     #[serde(default)]
     collect: bool,
     /// The players currently sitting on this square, in their order of play.
-    #[serde(skip)]
     #[serde(default = "PlayOrder::empty")]
     players: PlayOrder,
 }
