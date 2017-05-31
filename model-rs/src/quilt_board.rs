@@ -1,5 +1,6 @@
 use std::default::Default;
 
+use result::{QResult, PlayerError};
 use piece::Piece;
 use position::{Position, Dimension, Transformation};
 
@@ -13,14 +14,6 @@ use position::{Position, Dimension, Transformation};
 pub struct QuiltBoard {
     dimension: Dimension,
     rows:      Box<[Box<[bool]>]>,
-}
-
-/// The ways in which a piece placement can fail.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum PlacementError {
-    OverhangsRight,
-    OverhangsBottom,
-    OverlapsPiece,
 }
 
 /// The width and height of the default quilt board.
@@ -112,17 +105,17 @@ impl QuiltBoard {
     pub fn can_add_piece(&self, position: Position,
                          piece: &Piece,
                          transformation: Transformation)
-                         -> Result<(), PlacementError>
+                         -> QResult<()>
     {
         for p in piece.positions(transformation) {
             let p = p.translate(position);
 
             if p.x >= self.dimension.width {
-                return Err(PlacementError::OverhangsRight);
+                return Err(PlayerError::PlacementOverhangsRight);
             } else if p.y >= self.dimension.height {
-                return Err(PlacementError::OverhangsBottom);
+                return Err(PlayerError::PlacementOverhangsBottom);
             } else if self.is_position_covered(p) {
-                return Err(PlacementError::OverlapsPiece);
+                return Err(PlayerError::PlacementOverlapsPiece);
             }
         }
 
@@ -131,7 +124,7 @@ impl QuiltBoard {
 
     /// Adds the given piece at the specified position under the given transformation.
     pub fn add_piece(&mut self, position: Position, piece: &Piece, transformation: Transformation)
-                     -> Result<(), PlacementError>
+                     -> QResult<()>
     {
         self.can_add_piece(position, piece, transformation)?;
 
@@ -268,10 +261,10 @@ mod test {
     fn place_off_board() {
         let mut board = QuiltBoard::default();
         assert_eq!(board.add_piece(pos(8, 1), &a_piece(), Transformation::identity()),
-                   Err(PlacementError::OverhangsRight));
+                   Err(PlayerError::PlacementOverhangsRight));
 
         assert_eq!(board.add_piece(pos(4, 7), &a_piece(), Transformation::identity()),
-                   Err(PlacementError::OverhangsBottom));
+                   Err(PlayerError::PlacementOverhangsBottom));
     }
 
     #[test]
@@ -280,9 +273,9 @@ mod test {
         assert_eq!(board.add_piece(pos(2, 1), &a_piece(), Transformation::identity()),
                    Ok(()));
         assert_eq!(board.add_piece(pos(2, 1), &a_piece(), Transformation::identity()),
-                   Err(PlacementError::OverlapsPiece));
+                   Err(PlayerError::PlacementOverlapsPiece));
         assert_eq!(board.add_piece(pos(3, 1), &a_piece(), Transformation::identity()),
-                   Err(PlacementError::OverlapsPiece));
+                   Err(PlayerError::PlacementOverlapsPiece));
         assert_eq!(board.add_piece(pos(4, 1), &a_piece(), Transformation::identity()),
                    Ok(()));
     }

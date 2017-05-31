@@ -8,6 +8,7 @@ extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
 
+pub mod result;
 pub mod position;
 pub mod piece;
 pub mod quilt_board;

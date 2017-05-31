@@ -3,6 +3,8 @@ use std::collections::{vec_deque, VecDeque};
 use rand;
 use piece::Piece;
 
+use result::{QResult, PlayerError};
+
 /// The queue of pieces to be taken.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct PieceBoard {
@@ -39,11 +41,11 @@ impl PieceBoard {
         Pieces(self.piece_queue.iter())
     }
 
-    pub fn take(&mut self, depth: usize) -> Result<Piece, String> {
+    pub fn take(&mut self, depth: usize) -> QResult<Piece> {
         if depth > self.depth {
-            Err("Can't take pieces that far in".to_owned())
+            Err(PlayerError::TakeOverDepth)
         } else if depth >= self.piece_queue.len() {
-            Err("There aren't that many pieces.".to_owned())
+            Err(PlayerError::OutOfPieces)
         } else {
             let mut stack = Vec::new();
             for _ in 0..depth {
