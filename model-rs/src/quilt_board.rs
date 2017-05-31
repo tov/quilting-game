@@ -166,18 +166,11 @@ mod test {
         Position::new(x, y)
     }
 
-    // ##
-    //  #
-    //  #
-    fn a_piece() -> Piece {
-        Piece::new(vec![pos(0, 0), pos(1, 0), pos(1, 1), pos(1, 2)], 0, 0, 0)
-    }
-
     #[test]
     fn place_a_piece_in_upper_left() {
         let mut board = QuiltBoard::default();
 
-        assert_eq!(board.add_piece(pos(0, 0), &a_piece(), Transformation::identity()), Ok(()));
+        assert_eq!(board.add_piece(pos(0, 0), &examples::piece0(), Transformation::identity()), Ok(()));
 
         assert_eq!(board.positions_covered(), 4);
         assert!(board.is_position_covered(pos(0, 0)));
@@ -194,7 +187,7 @@ mod test {
     fn place_four_pieces() {
         let mut board = QuiltBoard::default();
 
-        assert_eq!(board.add_piece(pos(2, 1), &a_piece(), Transformation::identity()), Ok(()));
+        assert_eq!(board.add_piece(pos(2, 1), &examples::piece0(), Transformation::identity()), Ok(()));
         assert_eq!(board.visualize(),
                    "---------\n\
                     --##-----\n\
@@ -205,7 +198,7 @@ mod test {
                     ---------\n\
                     ---------\n\
                     ---------\n");
-        assert_eq!(board.add_piece(pos(2, 2), &a_piece(),
+        assert_eq!(board.add_piece(pos(2, 2), &examples::piece0(),
                                    Transformation::new(Rotation::Clockwise180, Flip::Identity)),
                    Ok(()));
         assert_eq!(board.visualize(),
@@ -222,7 +215,7 @@ mod test {
         assert!(board.is_square_covered(2));
         assert!(!board.is_square_covered(3));
 
-        assert_eq!(board.add_piece(pos(4, 1), &a_piece(),
+        assert_eq!(board.add_piece(pos(4, 1), &examples::piece0(),
                                    Transformation::new(Rotation::NoRotation, Flip::Horizontal)),
                    Ok(()));
         assert_eq!(board.visualize(),
@@ -239,7 +232,7 @@ mod test {
         assert!(board.is_square_covered(3));
         assert!(!board.is_square_covered(4));
 
-        assert_eq!(board.add_piece(pos(4, 2), &a_piece(),
+        assert_eq!(board.add_piece(pos(4, 2), &examples::piece0(),
                                    Transformation::new(Rotation::Clockwise180, Flip::Horizontal)),
                    Ok(()));
         assert_eq!(board.visualize(),
@@ -260,23 +253,23 @@ mod test {
     #[test]
     fn place_off_board() {
         let mut board = QuiltBoard::default();
-        assert_eq!(board.add_piece(pos(8, 1), &a_piece(), Transformation::identity()),
+        assert_eq!(board.add_piece(pos(8, 1), &examples::piece0(), Transformation::identity()),
                    Err(PlayerError::PlacementOverhangsRight));
 
-        assert_eq!(board.add_piece(pos(4, 7), &a_piece(), Transformation::identity()),
+        assert_eq!(board.add_piece(pos(4, 7), &examples::piece0(), Transformation::identity()),
                    Err(PlayerError::PlacementOverhangsBottom));
     }
 
     #[test]
     fn place_overlapping() {
         let mut board = QuiltBoard::default();
-        assert_eq!(board.add_piece(pos(2, 1), &a_piece(), Transformation::identity()),
+        assert_eq!(board.add_piece(pos(2, 1), &examples::piece0(), Transformation::identity()),
                    Ok(()));
-        assert_eq!(board.add_piece(pos(2, 1), &a_piece(), Transformation::identity()),
+        assert_eq!(board.add_piece(pos(2, 1), &examples::piece0(), Transformation::identity()),
                    Err(PlayerError::PlacementOverlapsPiece));
-        assert_eq!(board.add_piece(pos(3, 1), &a_piece(), Transformation::identity()),
+        assert_eq!(board.add_piece(pos(3, 1), &examples::piece0(), Transformation::identity()),
                    Err(PlayerError::PlacementOverlapsPiece));
-        assert_eq!(board.add_piece(pos(4, 1), &a_piece(), Transformation::identity()),
+        assert_eq!(board.add_piece(pos(4, 1), &examples::piece0(), Transformation::identity()),
                    Ok(()));
     }
 }
