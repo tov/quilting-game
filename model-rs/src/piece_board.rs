@@ -90,26 +90,32 @@ pub struct PieceBoard {
 }
 
 impl PieceBoard {
+    /// Creates a new piece board with the default values, pieces shuffled.
     pub fn new() -> Self {
         PieceBoardBuilder::new().build()
     }
 
+    /// Checks whether no pieces remain.
     pub fn is_empty(&self) -> bool {
         self.piece_queue.is_empty()
     }
 
+    /// Gets the number of pieces remaining.
     pub fn len(&self) -> usize {
         self.piece_queue.len()
     }
 
+    /// Gets the allowed take depth.
     pub fn depth(&self) -> usize {
         self.depth
     }
 
+    /// Gets an iterator over the available pieces in order.
     pub fn pieces(&self) -> Pieces {
         Pieces(self.piece_queue.iter())
     }
 
+    /// Takes the `depth`th piece, if possible.
     pub fn take(&mut self, depth: usize) -> QResult<Piece> {
         if depth > self.depth {
             Err(PlayerError::TakeOverDepth)
@@ -129,6 +135,7 @@ impl PieceBoard {
     }
 }
 
+/// An iterator over the pieces of a `PieceBoard` in order.
 #[derive(Debug, Clone)]
 pub struct Pieces<'a>(vec_deque::Iter<'a, Piece>);
 
