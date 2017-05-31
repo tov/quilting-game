@@ -296,6 +296,7 @@ mod test {
         assert_eq!(time_board.current_player(), play_order.players().nth(1));
         assert_eq!(time_board.index_of_current_player(), 10);
         assert_eq!(time_board.index_of_next_player(), 14);
+        assert!(! time_board.is_game_over());
 
         // [][][][][][C][][C][][C][P][][][][C12]
         let mr = time_board.move_player(4);
@@ -304,5 +305,6 @@ mod test {
         assert_eq!(mr.distance, 4);
 
         assert_eq!(time_board.current_player(), None);
+        assert!(time_board.is_game_over());
     }
 }
