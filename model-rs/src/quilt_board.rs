@@ -142,6 +142,7 @@ impl QuiltBoard {
         Ok(())
     }
 
+    #[cfg(test)]
     fn visualize(&self) -> String {
         let mut result = String::new();
 

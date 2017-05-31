@@ -3,7 +3,7 @@ use std::default::Default;
 /// A position on the board or in a piece.
 ///
 /// Origin is in the upper left.
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize)]
 pub struct Position {
     pub x: usize,
     pub y: usize,
@@ -32,7 +32,7 @@ impl Position {
 /// The dimensions of a board or piece.
 ///
 /// Origin is in the upper left.
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize)]
 pub struct Dimension {
     pub width: usize,
     pub height: usize,

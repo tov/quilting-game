@@ -1,5 +1,6 @@
-use std::cmp;
-use std::slice;
+use std::{cmp, fmt, slice};
+
+use serde::de::{self, Deserialize, Deserializer, Visitor, SeqAccess, MapAccess};
 
 use position::{Position, Dimension, Transformation};
 
@@ -10,8 +11,9 @@ use position::{Position, Dimension, Transformation};
 ///  - The positions fit tightly within the dimension.
 ///
 ///  - The positions are sorted.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Piece {
+    #[serde(skip_serializing)]
     dimension: Dimension,
     positions: Box<[Position]>,
     cost:      usize,
@@ -20,10 +22,7 @@ pub struct Piece {
 
 impl Piece {
     /// Constructs a new piece from the given positions, cost, and move distance.
-    pub fn new<I>(positions: I, cost: usize, distance: usize) -> Self
-        where I: IntoIterator<Item = Position>
-    {
-        let mut positions: Vec<_> = positions.into_iter().collect();
+    pub fn new(mut positions: Vec<Position>, cost: usize, distance: usize) -> Self {
         positions.sort();
         positions.dedup();
 
@@ -69,6 +68,78 @@ impl Piece {
             raw_dimension: self.dimension,
             transformation: transformation,
         }
+    }
+}
+
+impl<'de> Deserialize<'de> for Piece {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where D: Deserializer<'de>
+    {
+        #[derive(Deserialize)]
+        #[serde(field_identifier, rename_all = "lowercase")]
+        enum Field { Positions, Cost, Distance, }
+
+        struct PieceVisitor;
+
+        impl<'de> Visitor<'de> for PieceVisitor {
+            type Value = Piece;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("struct Piece")
+            }
+
+            fn visit_seq<V>(self, mut seq: V) -> Result<Piece, V::Error>
+                where V: SeqAccess<'de>
+            {
+                let positions = seq.next_element()?
+                    .ok_or_else(|| de::Error::invalid_length(0, &self))?;
+                let cost = seq.next_element()?
+                    .ok_or_else(|| de::Error::invalid_length(1, &self))?;
+                let distance = seq.next_element()?
+                    .ok_or_else(|| de::Error::invalid_length(2, &self))?;
+                Ok(Piece::new(positions, cost, distance))
+            }
+
+            fn visit_map<V>(self, mut map: V) -> Result<Piece, V::Error>
+                where V: MapAccess<'de>
+            {
+                let mut positions = None;
+                let mut cost = None;
+                let mut distance = None;
+
+                while let Some(key) = map.next_key()? {
+                    match key {
+                        Field::Positions => {
+                            if positions.is_some() {
+                                return Err(de::Error::duplicate_field("positions"));
+                            }
+                            positions = Some(map.next_value()?);
+                        }
+                        Field::Cost => {
+                            if cost.is_some() {
+                                return Err(de::Error::duplicate_field("cost"));
+                            }
+                            cost = Some(map.next_value()?);
+                        }
+                        Field::Distance => {
+                            if distance.is_some() {
+                                return Err(de::Error::duplicate_field("distance"));
+                            }
+                            distance = Some(map.next_value()?);
+                        }
+                    }
+                }
+
+                let positions = positions.ok_or_else(|| de::Error::missing_field("positions"))?;
+                let cost      = cost.ok_or_else(|| de::Error::missing_field("cost"))?;
+                let distance  = distance.ok_or_else(|| de::Error::missing_field("distance"))?;
+
+                Ok(Piece::new(positions, cost, distance))
+            }
+        }
+
+        const FIELDS: &'static [&'static str] = &["positions", "cost", "distance"];
+        deserializer.deserialize_struct("Piece", FIELDS, PieceVisitor)
     }
 }
 
