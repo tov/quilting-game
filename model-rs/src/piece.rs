@@ -58,6 +58,11 @@ impl Piece {
         self.dimension(transformation).height
     }
 
+    /// Gets the number of positions covered by the piece.
+    pub fn size(&self) -> usize {
+        self.positions.len()
+    }
+
     /// Gets the cost of this piece.
     pub fn cost(&self) -> usize {
         self.cost
@@ -206,6 +211,59 @@ impl<'a> ExactSizeIterator for Positions<'a> {
     }
 }
 
+/// Some sample pieces for testing with.
+pub mod examples {
+    use super::Piece;
+    use position::Position;
+    
+    fn pos(x: usize, y: usize) -> Position {
+        Position::new(x, y)
+    }
+
+    // ##
+    //  #
+    //  #
+    pub fn piece0() -> Piece {
+        Piece::new(vec![pos(0, 0), pos(1, 0), pos(1, 1), pos(1, 2)],
+                   2, 1, 0)
+    }
+
+    // ##
+    //  #
+    //  #
+    //  ##
+    pub fn piece1() -> Piece {
+        Piece::new(vec![pos(0, 0), pos(1, 0), pos(1, 1), pos(1, 2), pos(1, 3), pos(2, 3)],
+                   1, 2, 0)
+    }
+
+    // ##
+    //  ##
+    //  ##
+    pub fn piece2() -> Piece {
+        Piece::new(vec![pos(0, 0), pos(1, 0), pos(1, 1), pos(2, 1), pos(1, 2), pos(2, 2)],
+                   8, 6, 3)
+    }
+
+    //  #
+    // ##
+    pub fn piece3() -> Piece {
+        Piece::new(vec![pos(1, 0), pos(0, 1), pos(1, 1)],
+                   1, 3, 0)
+    }
+
+    //  #
+    //  #
+    // ###
+    //  #
+    //  #
+    pub fn piece4() -> Piece {
+        Piece::new(vec![pos(1, 0), pos(1, 1), pos(0, 2), pos(1, 2),
+                        pos(2, 2), pos(1, 3), pos(1, 4)],
+                   1, 4, 1)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -216,22 +274,9 @@ mod test {
         Position::new(x, y)
     }
 
-    // 01
-    //  2
-    //  3
-    fn a_piece() -> Piece {
-        Piece {
-            dimension: Dimension::new(2, 3),
-            positions: vec![pos(0, 0), pos(1, 0), pos(1, 1), pos(1, 2)].into_boxed_slice(),
-            cost: 0,
-            distance: 0,
-            collect: 0,
-        }
-    }
-
     #[test]
     fn transform_width_height() {
-        let piece = a_piece();
+        let piece = examples::piece0();
         let t1 = Transformation::new(NoRotation,   Identity);
         let t2 = Transformation::new(Clockwise90,  Identity);
 
@@ -243,7 +288,7 @@ mod test {
 
     #[test]
     fn positions_iterator_with_identity() {
-        let piece = a_piece();
+        let piece = examples::piece0();
         // 01
         //  2
         //  3
@@ -257,7 +302,7 @@ mod test {
 
     #[test]
     fn positions_iterator_with_0_h() {
-        let piece = a_piece();
+        let piece = examples::piece0();
         // 10
         // 2
         // 3
@@ -271,7 +316,7 @@ mod test {
 
     #[test]
     fn positions_iterator_with_90_i() {
-        let piece = a_piece();
+        let piece = examples::piece0();
         //   0
         // 321
         let mut positions = piece.positions(Transformation::new(Clockwise90, Identity));
@@ -284,7 +329,7 @@ mod test {
 
     #[test]
     fn positions_iterator_with_90_h() {
-        let piece = a_piece();
+        let piece = examples::piece0();
         // 0
         // 123
         let mut positions = piece.positions(Transformation::new(Clockwise90, Horizontal));
