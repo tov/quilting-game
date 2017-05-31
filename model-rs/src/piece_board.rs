@@ -188,7 +188,13 @@ mod test {
     }
 
     #[test]
-    fn make_board() {
+    fn make_default_board() {
+        let board = PieceBoard::new();
+        assert_eq!(board.depth(), DEFAULT_DEPTH);
+    }
+
+    #[test]
+    fn make_board_with_pieces() {
         let board = PieceBoardBuilder::empty()
             .extend(pieces())
             .build();
