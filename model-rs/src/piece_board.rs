@@ -180,9 +180,43 @@ mod test {
 
     #[test]
     fn make_board() {
-        let builder = PieceBoardBuilder::empty()
-            .extend(pieces());
-        let board = builder.build();
+        let board = PieceBoardBuilder::empty()
+            .extend(pieces())
+            .build();
         assert_eq!(board.len(), 4);
+    }
+
+    #[test]
+    fn take_over_depth_error() {
+        let mut board = PieceBoardBuilder::empty()
+            .extend(pieces())
+            .build();
+        assert_eq!(board.take(5), Err(PlayerError::TakeOverDepth));
+    }
+
+    #[test]
+    fn take_0_repeatedly() {
+        let mut board = PieceBoardBuilder::empty()
+            .extend(pieces())
+            .build_in_order();
+
+        assert_eq!(board.take(0), Ok(examples::piece1()));
+        assert_eq!(board.take(0), Ok(examples::piece2()));
+        assert_eq!(board.take(0), Ok(examples::piece3()));
+        assert_eq!(board.take(0), Ok(examples::piece4()));
+        assert_eq!(board.take(0), Err(PlayerError::OutOfPieces));
+    }
+
+    #[test]
+    fn take_deeper() {
+        let mut board = PieceBoardBuilder::empty()
+            .extend(pieces())
+            .build_in_order();
+
+        assert_eq!(board.take(1), Ok(examples::piece2()));
+        assert_eq!(board.take(2), Ok(examples::piece4()));
+        assert_eq!(board.take(1), Ok(examples::piece3()));
+        assert_eq!(board.take(0), Ok(examples::piece1()));
+        assert_eq!(board.take(0), Err(PlayerError::OutOfPieces));
     }
 }
