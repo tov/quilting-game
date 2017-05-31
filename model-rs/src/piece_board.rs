@@ -1,3 +1,5 @@
+//! The queue of pieces to choose from.
+
 use std::collections::{vec_deque, VecDeque};
 use std::default::Default;
 

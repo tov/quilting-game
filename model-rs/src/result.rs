@@ -1,3 +1,5 @@
+//! Quilting game results and errors.
+
 use std::{error, fmt};
 
 /// The Quilting game result type.

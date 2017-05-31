@@ -1,3 +1,5 @@
+//! Game pieces, representing quilt patches.
+
 use std::{cmp, fmt, slice};
 
 use serde::de::{self, Deserialize, Deserializer, Visitor, SeqAccess, MapAccess};
@@ -220,43 +222,63 @@ pub mod examples {
         Position::new(x, y)
     }
 
-    // ##
-    //  #
-    //  #
+    /// A piece.
+    ///
+    /// ```text
+    /// ##
+    ///  #
+    ///  #
+    /// ```
     pub fn piece0() -> Piece {
         Piece::new(vec![pos(0, 0), pos(1, 0), pos(1, 1), pos(1, 2)],
                    2, 1, 0)
     }
 
-    // ##
-    //  #
-    //  #
-    //  ##
+    /// A piece.
+    ///
+    /// ```text
+    /// ##
+    ///  #
+    ///  #
+    ///  ##
+    /// ```
     pub fn piece1() -> Piece {
         Piece::new(vec![pos(0, 0), pos(1, 0), pos(1, 1), pos(1, 2), pos(1, 3), pos(2, 3)],
                    1, 2, 0)
     }
 
-    // ##
-    //  ##
-    //  ##
+    /// A piece.
+    ///
+    /// ```text
+    /// ##
+    ///  ##
+    ///  ##
+    /// ```
     pub fn piece2() -> Piece {
         Piece::new(vec![pos(0, 0), pos(1, 0), pos(1, 1), pos(2, 1), pos(1, 2), pos(2, 2)],
                    8, 6, 3)
     }
 
-    //  #
-    // ##
+    /// A piece.
+    ///
+    /// ```text
+    ///  #
+    /// ##
+    /// ```
     pub fn piece3() -> Piece {
         Piece::new(vec![pos(1, 0), pos(0, 1), pos(1, 1)],
                    1, 3, 0)
     }
 
-    //  #
-    //  #
-    // ###
-    //  #
-    //  #
+    /// A piece.
+    ///
+    /// ```text
+    ///  #
+    ///  #
+    /// ###
+    ///  #
+    ///  #
+    /// ```
     pub fn piece4() -> Piece {
         Piece::new(vec![pos(1, 0), pos(1, 1), pos(0, 2), pos(1, 2),
                         pos(2, 2), pos(1, 3), pos(1, 4)],

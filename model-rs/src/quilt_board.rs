@@ -1,3 +1,5 @@
+//! The board on which the quilt is constructed.
+
 use std::default::Default;
 
 use result::{QResult, PlayerError};

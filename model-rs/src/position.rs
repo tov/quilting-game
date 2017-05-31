@@ -1,3 +1,5 @@
+//! Positions, dimensions, and position transformations.
+
 use std::default::Default;
 
 /// A position on the board or in a piece.
@@ -61,11 +63,18 @@ impl Dimension {
     }
 }
 
+/// The rotation portion of a `Transformation`
+///
+/// Allows rotating to any multiple of 90 degrees, including 0.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Rotation {
+    /// The identity rotation.
     NoRotation,
+    /// Rotate by 90 degrees clockwise.
     Clockwise90,
+    /// Rotate by 180 degrees clockwise.
     Clockwise180,
+    /// Rotate by 270 degrees clockwise.
     Clockwise270,
 }
 
@@ -92,9 +101,14 @@ impl Rotation {
     }
 }
 
+/// The flip portion of a `Transformation`.
+///
+/// Can be a horizontal flip or no change.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Flip {
+    /// The identity flip.
     Identity,
+    /// Flip horizontally.
     Horizontal,
 }
 

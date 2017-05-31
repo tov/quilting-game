@@ -1,3 +1,5 @@
+//! The board along which players’ pieces move, tracking time.
+
 use std::collections::VecDeque;
 
 use piece::Piece;
