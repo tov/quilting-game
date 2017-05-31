@@ -1,9 +1,75 @@
 use std::collections::{vec_deque, VecDeque};
+use std::default::Default;
 
 use rand;
+use serde_json;
+
 use piece::Piece;
 
 use result::{QResult, PlayerError};
+
+/// The default set of pieces, serialized.
+const PIECES_JSON: &'static [u8] = include_bytes!("../data/pieces.json");
+
+/// The default depth at which we can take pieces (0-based).
+const DEFAULT_DEPTH: usize = 2;
+
+/// Builder for constructing and configuring `PieceBoard`s.
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct PieceBoardBuilder {
+    piece_queue: VecDeque<Piece>,
+    depth:       usize,
+}
+
+impl PieceBoardBuilder {
+    /// Will build a `PieceBoard` with the default depth and default set of pieces.
+    pub fn new() -> Self {
+        let result = Self::empty();
+        result.extend_from_slice(PIECES_JSON).unwrap()
+    }
+
+    /// Will build a `PieceBoard` with the default depth and no pieces.
+    pub fn empty() -> Self {
+        PieceBoardBuilder {
+            piece_queue: VecDeque::new(),
+            depth:       DEFAULT_DEPTH,
+        }
+    }
+
+    /// Sets the piece taking depth.
+    pub fn depth(mut self, depth: usize) -> Self {
+        self.depth = depth;
+        self
+    }
+
+    /// Adds the given sequence of pieces to the piece queue.
+    pub fn extend<I>(mut self, pieces: I) -> Self
+        where I: IntoIterator<Item = Piece>
+    {
+        self.piece_queue.extend(pieces);
+        self
+    }
+
+    /// Deserializes pieces from a `&[u8]` of JSON, adding to the piece queue.
+    pub fn extend_from_slice(self, pieces: &[u8]) -> serde_json::Result<Self> {
+        let pieces: Vec<Piece> = serde_json::from_slice(pieces)?;
+        Ok(self.extend(pieces))
+    }
+
+    /// Builds the `PieceBoard`, shuffling the pieces.
+    pub fn build(mut self) -> PieceBoard {
+        shuffle(&mut rand::thread_rng(), &mut self.piece_queue);
+        self.build_in_order()
+    }
+
+    /// Builds the `PieceBoard` without shuffling the pieces.
+    pub fn build_in_order(self) -> PieceBoard {
+        PieceBoard {
+            piece_queue: self.piece_queue,
+            depth:       self.depth,
+        }
+    }
+}
 
 /// The queue of pieces to be taken.
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -12,25 +78,9 @@ pub struct PieceBoard {
     depth: usize,
 }
 
-#[derive(Debug, Clone)]
-pub struct Pieces<'a>(vec_deque::Iter<'a, Piece>);
-
 impl PieceBoard {
-    pub fn new<I>(piece_queue: I, depth: usize) -> Self
-        where I: IntoIterator<Item = Piece>
-    {
-        PieceBoard {
-            piece_queue: piece_queue.into_iter().collect(),
-            depth: depth
-        }
-    }
-
-    pub fn random<I>(piece_queue: I, depth: usize) -> Self
-        where I: IntoIterator<Item = Piece>
-    {
-        let mut result = Self::new(piece_queue, depth);
-        shuffle(&mut rand::thread_rng(), &mut result.piece_queue);
-        result
+    pub fn new() -> Self {
+        PieceBoardBuilder::new().build()
     }
 
     pub fn depth(&self) -> usize {
@@ -59,6 +109,9 @@ impl PieceBoard {
         }
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct Pieces<'a>(vec_deque::Iter<'a, Piece>);
 
 impl<'a> Iterator for Pieces<'a> {
     type Item = &'a Piece;
@@ -92,5 +145,17 @@ fn shuffle<R: rand::Rng, T>(rng: &mut R, vd: &mut VecDeque<T>) {
         let range = Range::new(0, i);
         let j = range.ind_sample(rng);
         vd.swap(i, j);
+    }
+}
+
+impl Default for PieceBoardBuilder {
+    fn default() -> Self {
+        PieceBoardBuilder::new()
+    }
+}
+
+impl Default for PieceBoard {
+    fn default() -> Self {
+        PieceBoard::new()
     }
 }

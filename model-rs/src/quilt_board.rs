@@ -170,7 +170,7 @@ mod test {
     //  #
     //  #
     fn a_piece() -> Piece {
-        Piece::new(vec![pos(0, 0), pos(1, 0), pos(1, 1), pos(1, 2)], 0, 0)
+        Piece::new(vec![pos(0, 0), pos(1, 0), pos(1, 1), pos(1, 2)], 0, 0, 0)
     }
 
     #[test]

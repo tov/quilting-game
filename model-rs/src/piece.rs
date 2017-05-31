@@ -13,16 +13,22 @@ use position::{Position, Dimension, Transformation};
 ///  - The positions are sorted.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Piece {
+    /// The dimensions of the piece.
     #[serde(skip_serializing)]
     dimension: Dimension,
+    /// The pieces positions.
     positions: Box<[Position]>,
+    /// The cost of the piece.
     cost:      usize,
+    /// The distance to move when taking the piece.
     distance:  usize,
+    /// The value to collect when collecting, if holding the piece.
+    collect:   usize,
 }
 
 impl Piece {
     /// Constructs a new piece from the given positions, cost, and move distance.
-    pub fn new(mut positions: Vec<Position>, cost: usize, distance: usize) -> Self {
+    pub fn new(mut positions: Vec<Position>, cost: usize, distance: usize, collect: usize) -> Self {
         positions.sort();
         positions.dedup();
 
@@ -33,6 +39,7 @@ impl Piece {
             positions: positions.into_boxed_slice(),
             cost:      cost,
             distance:  distance,
+            collect:   collect,
         }
     }
 
@@ -61,6 +68,11 @@ impl Piece {
         self.distance
     }
 
+    /// Gets the value to collect when holding this piece.
+    pub fn collect(&self) -> usize {
+        self.collect
+    }
+
     /// Gets an iterator over the positions of this piece under the given transformation.
     pub fn positions(&self, transformation: Transformation) -> Positions {
         Positions {
@@ -77,7 +89,7 @@ impl<'de> Deserialize<'de> for Piece {
     {
         #[derive(Deserialize)]
         #[serde(field_identifier, rename_all = "lowercase")]
-        enum Field { Positions, Cost, Distance, }
+        enum Field { Positions, Cost, Distance, Collect, }
 
         struct PieceVisitor;
 
@@ -97,7 +109,9 @@ impl<'de> Deserialize<'de> for Piece {
                     .ok_or_else(|| de::Error::invalid_length(1, &self))?;
                 let distance = seq.next_element()?
                     .ok_or_else(|| de::Error::invalid_length(2, &self))?;
-                Ok(Piece::new(positions, cost, distance))
+                let collect = seq.next_element()?
+                    .ok_or_else(|| de::Error::invalid_length(3, &self))?;
+                Ok(Piece::new(positions, cost, distance, collect))
             }
 
             fn visit_map<V>(self, mut map: V) -> Result<Piece, V::Error>
@@ -106,6 +120,7 @@ impl<'de> Deserialize<'de> for Piece {
                 let mut positions = None;
                 let mut cost = None;
                 let mut distance = None;
+                let mut collect = None;
 
                 while let Some(key) = map.next_key()? {
                     match key {
@@ -127,18 +142,25 @@ impl<'de> Deserialize<'de> for Piece {
                             }
                             distance = Some(map.next_value()?);
                         }
+                        Field::Collect => {
+                            if collect.is_some() {
+                                return Err(de::Error::duplicate_field("collect"));
+                            }
+                            collect = Some(map.next_value()?);
+                        }
                     }
                 }
 
                 let positions = positions.ok_or_else(|| de::Error::missing_field("positions"))?;
                 let cost      = cost.ok_or_else(|| de::Error::missing_field("cost"))?;
                 let distance  = distance.ok_or_else(|| de::Error::missing_field("distance"))?;
+                let collect   = collect.ok_or_else(|| de::Error::missing_field("collect"))?;
 
-                Ok(Piece::new(positions, cost, distance))
+                Ok(Piece::new(positions, cost, distance, collect))
             }
         }
 
-        const FIELDS: &'static [&'static str] = &["positions", "cost", "distance"];
+        const FIELDS: &'static [&'static str] = &["positions", "cost", "distance", "collect"];
         deserializer.deserialize_struct("Piece", FIELDS, PieceVisitor)
     }
 }
@@ -203,6 +225,7 @@ mod test {
             positions: vec![pos(0, 0), pos(1, 0), pos(1, 1), pos(1, 2)].into_boxed_slice(),
             cost: 0,
             distance: 0,
+            collect: 0,
         }
     }
 
