@@ -11,6 +11,7 @@ extern crate serde_json;
 extern crate serde_derive;
 
 pub mod result;
+pub mod player;
 pub mod position;
 pub mod piece;
 pub mod quilt_board;
