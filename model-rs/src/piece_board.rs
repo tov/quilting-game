@@ -16,7 +16,7 @@ const PIECES_JSON: &'static [u8] = include_bytes!("../data/pieces.json");
 /// The default depth at which we can take pieces (0-based).
 const DEFAULT_DEPTH: usize = 2;
 
-/// Builder for constructing and configuring `PieceBoard`s.
+/// Builder for constructing and configuring [`PieceBoard`](struct.PieceBoard.html)s.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct PieceBoardBuilder {
     piece_queue: VecDeque<Piece>,
@@ -84,7 +84,9 @@ fn shuffle<R: rand::Rng, T>(rng: &mut R, vd: &mut VecDeque<T>) {
     }
 }
 
-/// The queue of pieces to be taken.
+/// The queue of [`Piece`](../piece/struct.Piece.html)s to be taken.
+///
+/// Configure and construct with [`PieceBoardBuilder`](struct.PieceBoardBuilder.html).
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct PieceBoard {
     piece_queue: VecDeque<Piece>,
@@ -92,11 +94,6 @@ pub struct PieceBoard {
 }
 
 impl PieceBoard {
-    /// Creates a new piece board with the default values, pieces shuffled.
-    pub fn new() -> Self {
-        PieceBoardBuilder::new().build()
-    }
-
     /// Checks whether no pieces remain.
     pub fn is_empty(&self) -> bool {
         self.piece_queue.is_empty()
@@ -137,7 +134,7 @@ impl PieceBoard {
     }
 }
 
-/// An iterator over the pieces of a `PieceBoard` in order.
+/// An iterator over the pieces of a [`PieceBoard`](struct.PieceBoard.html) in order.
 #[derive(Debug, Clone)]
 pub struct Pieces<'a>(vec_deque::Iter<'a, Piece>);
 
@@ -173,7 +170,7 @@ impl Default for PieceBoardBuilder {
 
 impl Default for PieceBoard {
     fn default() -> Self {
-        PieceBoard::new()
+        PieceBoardBuilder::new().build()
     }
 }
 
@@ -189,7 +186,7 @@ mod test {
 
     #[test]
     fn make_default_board() {
-        let board = PieceBoard::new();
+        let board = PieceBoard::default();
         assert_eq!(board.depth(), DEFAULT_DEPTH);
     }
 

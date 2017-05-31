@@ -13,6 +13,7 @@ use position::{Position, Dimension, Transformation};
 ///  - rows.len() == height
 ///
 ///  - for row in rows { row.len() == width }
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QuiltBoard {
     dimension: Dimension,
     rows:      Box<[Box<[bool]>]>,
@@ -154,7 +155,7 @@ impl QuiltBoard {
 
 impl Default for QuiltBoard {
     fn default() -> Self {
-        QuiltBoard::new(Dimension::new(DEFAULT_DIMENSION, DEFAULT_DIMENSION))
+        QuiltBoard::new(Dimension::square(DEFAULT_DIMENSION))
     }
 }
 

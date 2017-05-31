@@ -4,12 +4,18 @@ use std::default::Default;
 use std::slice;
 use rand;
 
+use position::Dimension;
+use quilt_board::{self, QuiltBoard};
+
 /// A game player.
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize)]
 pub struct Player(usize);
 
 /// The default number of players (2).
 pub const DEFAULT_NPLAYERS: usize = 2;
+
+/// The default amount of money each player starts with (5).
+pub const DEFAULT_STARTING_CURRENCY: usize = 5;
 
 impl Player {
     /// A `usize` identifying the given player.
@@ -124,5 +130,35 @@ impl<'a> ExactSizeIterator for Players<'a> {
 impl<'a> DoubleEndedIterator for Players<'a> {
     fn next_back(&mut self) -> Option<Self::Item> {
         self.0.next()
+    }
+}
+
+/// The state associated with one player.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PlayerState {
+    /// The player’s quilt board.
+    quilt_board: QuiltBoard,
+    /// The player’s amount of currency.
+    currency:    usize,
+    /// Any bonus points earned by the player.
+    bonus:       usize,
+}
+
+impl PlayerState {
+    /// Creates a new player with the given amount of starting currency.
+    pub fn new(dimension: Dimension, currency: usize) -> Self {
+        PlayerState {
+            quilt_board: QuiltBoard::new(dimension),
+            currency:    currency,
+            bonus:       0,
+        }
+    }
+}
+
+impl Default for PlayerState {
+    fn default() -> Self {
+        PlayerState::new(Dimension::new(quilt_board::DEFAULT_DIMENSION,
+                                        quilt_board::DEFAULT_DIMENSION),
+                         DEFAULT_STARTING_CURRENCY)
     }
 }

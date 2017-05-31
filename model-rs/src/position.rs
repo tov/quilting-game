@@ -49,6 +49,11 @@ impl Dimension {
         }
     }
 
+    /// Creates a square dimension of the given size.
+    pub fn square(size: usize) -> Self {
+        Self::new(size, size)
+    }
+
     /// Is the given `Position` within the given `Dimension`?
     pub fn contains(self, p: Position) -> bool {
         p.x < self.width && p.y < self.height
