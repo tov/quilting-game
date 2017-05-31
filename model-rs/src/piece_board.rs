@@ -127,14 +127,11 @@ impl PieceBoard {
         } else if depth >= self.piece_queue.len() {
             Err(PlayerError::OutOfPieces)
         } else {
-            let mut stack = Vec::new();
             for _ in 0..depth {
-                stack.push(self.piece_queue.pop_front().unwrap());
+                let piece = self.piece_queue.pop_front().unwrap();
+                self.piece_queue.push_back(piece);
             }
             let result = self.piece_queue.pop_front().unwrap();
-            for piece in stack.into_iter().rev() {
-                self.piece_queue.push_front(piece)
-            }
             Ok(result)
         }
     }
@@ -231,10 +228,14 @@ mod test {
             .extend(pieces())
             .build_in_order();
 
+        // 1 2 3 4
         assert_eq!(board.take(1), Ok(examples::piece2()));
-        assert_eq!(board.take(2), Ok(examples::piece4()));
-        assert_eq!(board.take(1), Ok(examples::piece3()));
-        assert_eq!(board.take(0), Ok(examples::piece1()));
+        // 3 4 1
+        assert_eq!(board.take(2), Ok(examples::piece1()));
+        // 3 4
+        assert_eq!(board.take(1), Ok(examples::piece4()));
+        // 3
+        assert_eq!(board.take(0), Ok(examples::piece3()));
         assert_eq!(board.take(0), Err(PlayerError::OutOfPieces));
     }
 }
