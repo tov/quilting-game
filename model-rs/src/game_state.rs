@@ -170,7 +170,7 @@ pub struct GameState {
 impl GameState {
     /// Is the game over?
     pub fn is_game_over(&self) -> bool {
-        self.time_board.is_game_over() || self.piece_board.is_empty()
+        self.time_board.is_game_over()
     }
 
     /// Gets a reference to the piece board.
