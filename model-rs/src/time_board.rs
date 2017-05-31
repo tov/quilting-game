@@ -47,7 +47,7 @@ impl Square {
     }
 }
 
-/// The result of moving along the `PieceBoard`.
+/// The result of moving along the `TimeBoard`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MoveResult {
     /// Any pieces acquired from the move.
