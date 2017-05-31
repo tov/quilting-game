@@ -172,6 +172,21 @@ impl GameState {
     pub fn is_game_over(&self) -> bool {
         self.time_board.is_game_over() || self.piece_board.is_empty()
     }
+
+    /// Gets a reference to the piece board.
+    pub fn piece_board(&self) -> &PieceBoard {
+        &self.piece_board
+    }
+
+    /// Gets a reference to the time board.
+    pub fn time_board(&self) -> &TimeBoard {
+        &self.time_board
+    }
+
+    /// Gets the states of the players.
+    pub fn player_states(&self) -> &[PlayerState] {
+        &*self.players
+    }
 }
 
 impl Default for GameState {
