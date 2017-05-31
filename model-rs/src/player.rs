@@ -1,11 +1,15 @@
 //! Represents players of the game.
 
+use std::default::Default;
 use std::slice;
 use rand;
 
 /// A game player.
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Player(usize);
+
+/// The default number of players (2).
+pub const DEFAULT_NPLAYERS: usize = 2;
 
 impl Player {
     /// A `usize` identifying the given player.
@@ -78,6 +82,12 @@ fn shuffle<R: rand::Rng, T>(rng: &mut R, v: &mut Vec<T>) {
         let range = Range::new(0, i);
         let j = range.ind_sample(rng);
         v.swap(i, j);
+    }
+}
+
+impl Default for PlayOrder {
+    fn default() -> Self {
+        PlayOrder::new(DEFAULT_NPLAYERS)
     }
 }
 

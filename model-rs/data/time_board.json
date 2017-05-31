@@ -1,0 +1,114 @@
+[
+  {},
+  {},
+  {},
+  {},
+  {},
+  {
+    "collect": true
+  },
+  {},
+  {},
+  {},
+  {},
+  {},
+  {
+    "collect": true
+  },
+  {},
+  {},
+  {},
+  {},
+  {},
+  {
+    "collect": true
+  },
+  {},
+  {},
+  {
+    "piece": {
+      "positions": [{"x": 0, "y": 0}],
+      "cost": 0,
+      "distance": 0,
+      "collect": 0
+    }
+  },
+  {},
+  {},
+  {},
+  {
+    "collect": true
+  },
+  {},
+  {},
+  {
+    "piece": {
+      "positions": [{"x": 0, "y": 0}],
+      "cost": 0,
+      "distance": 0,
+      "collect": 0
+    }
+  },
+  {},
+  {},
+  {},
+  {
+    "collect": true
+  },
+  {},
+  {},
+  {
+    "piece": {
+      "positions": [{"x": 0, "y": 0}],
+      "cost": 0,
+      "distance": 0,
+      "collect": 0
+    }
+  },
+  {},
+  {},
+  {},
+  {
+    "collect": true
+  },
+  {},
+  {},
+  {},
+  {},
+  {},
+  {
+    "collect": true
+  },
+  {},
+  {},
+  {
+    "piece": {
+      "positions": [{"x": 0, "y": 0}],
+      "cost": 0,
+      "distance": 0,
+      "collect": 0
+    }
+  },
+  {},
+  {},
+  {},
+  {
+    "collect": true
+  },
+  {},
+  {},
+  {
+    "piece": {
+      "positions": [{"x": 0, "y": 0}],
+      "cost": 0,
+      "distance": 0,
+      "collect": 0
+    }
+  },
+  {},
+  {},
+  {},
+  {
+    "collect": true
+  }
+]
